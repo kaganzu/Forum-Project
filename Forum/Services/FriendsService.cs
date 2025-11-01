@@ -2,15 +2,18 @@
 using Forum2.Implementations;
 using Forum2.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace Forum2.Services
 {
     public class FriendsService : IFriendsService
     {
         private readonly AppDbContext _context;
-        public FriendsService(AppDbContext context)
+        private readonly IUserService _userService;
+        public FriendsService(AppDbContext context,IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
         public async Task<FriendRequest> AnswerFriendRequestAsync(int requestId, State state)
         {
@@ -59,6 +62,8 @@ namespace Forum2.Services
         {
             var requests = await _context.FriendRequests
                 .Where(fr => fr.ReceiverId == userId && fr.IsAccepted == State.Pending)
+                .Include(fr => fr.Sender)
+                .Include(fr => fr.Receiver)
                 .ToListAsync();
             return requests;
         }
@@ -69,9 +74,12 @@ namespace Forum2.Services
             {
                 SenderId = senderId,
                 ReceiverId = receiverId,
+                Sender = await _userService.GetUserByIdAsync(senderId),
+                Receiver = await _userService.GetUserByIdAsync(receiverId),
                 SentAt = DateTime.UtcNow,
                 IsAccepted = State.Pending
             };
+           
             await _context.FriendRequests.AddAsync(friendRequest);
             await _context.SaveChangesAsync();
             return friendRequest;
