@@ -16,7 +16,7 @@ namespace Forum2.Services
             _context = context;
             _userService = new UserService(_context);
         }
-        public async Task<string?> LoginAsync(string usernameOrEmail, string password)
+        public async Task<User> LoginAsync(string usernameOrEmail, string password)
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == usernameOrEmail || u.Email == usernameOrEmail);
@@ -29,7 +29,7 @@ namespace Forum2.Services
             {
                 throw new UnauthorizedAccessException("Invalid password");
             }
-            return "Login success";
+            return user;
         }
 
         public async Task<string?> RegisterAsync(string username, string email, string password, string confirmPassword)

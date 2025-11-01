@@ -1,5 +1,6 @@
 ﻿using Forum2.Implementations;
 using Forum2.Models;
+using Forum2.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,9 +11,11 @@ namespace Forum2.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly JwtService _jwtService;
+        public AuthController(IAuthService authService,JwtService jwtService)
         {
             _authService = authService;
+            _jwtService = jwtService;
         }
 
         [HttpPost("register")]
@@ -36,10 +39,19 @@ namespace Forum2.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                throw new Exception("Invalid model state");
             }
-            await _authService.LoginAsync(req.UsernameOrEmail, req.Password);
-            return Ok(new { message = "Login successful." });
+            var user = await _authService.LoginAsync(req.UsernameOrEmail, req.Password);
+            if (user == null)
+            {
+                return Unauthorized(new { message = "Invalid username/email or password." });
+            }
+            string Token = _jwtService.CreateJwtToken(user); 
+            return Ok(new 
+            { 
+                message = "Login successful.",
+                token = Token
+            });
         }
     }
 }
