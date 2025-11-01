@@ -4,6 +4,7 @@ using Forum2.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Forum2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251101144131_AddAdminUser")]
+    partial class AddAdminUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -214,17 +217,9 @@ namespace Forum2.Migrations
                         {
                             Id = 1,
                             Email = "kaganidilman@gmail.com",
-                            PasswordHash = "AQAAAAIAAYagAAAAEMrFgOHHTvE0JSOOF52kZQ/yBgVvufPx3B2Nya8Q5oY53AOQuNTOpdH7XDE90lblTQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIOYZbkXhZ5JyBssB/1vS30gTqp0YD6srCH5qqDlDOjKDc3gH6gPVLNqPH3kBqyQ9w==",
                             Role = 0,
                             Username = "kagan.id"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Email = "kagankaramazov@gmail.com",
-                            PasswordHash = "AQAAAAIAAYagAAAAEHmN1xxssFNGJx4QQrU9XmGRNGYn3VoozWwSsZLFSoV+TCHtOvZHhivMnutiRsyjMA==",
-                            Role = 1,
-                            Username = "moderator.id"
                         });
                 });
 
