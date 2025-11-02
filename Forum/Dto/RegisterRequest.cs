@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Forum2.Models
+namespace Forum2.Dto
 {
     public class RegisterRequest
     {

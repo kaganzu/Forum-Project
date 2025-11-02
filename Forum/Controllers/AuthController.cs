@@ -1,5 +1,5 @@
-﻿using Forum2.Implementations;
-using Forum2.Models;
+﻿using Forum2.Dto;
+using Forum2.Implementations;
 using Forum2.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
