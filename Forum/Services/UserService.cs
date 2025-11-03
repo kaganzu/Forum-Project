@@ -1,4 +1,5 @@
 ﻿using Forum2.Data;
+using Forum2.Dto;
 using Forum2.Implementations;
 using Forum2.Models;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +13,19 @@ namespace Forum2.Services
         {
             _context = context;
         }
-        public async Task<User> CreateUserAsync(User user)
+        public async Task<UserDto> CreateUserAsync(User user)
         {
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
-            return user;
+            var userDto = new UserDto
+            {
+                Email = user.Email,
+                FriendCount = user.Friends.Count,
+                Username = user.Username,
+                Id = user.Id,
+                Role = user.Role
+            };
+            return userDto;
         }
 
         public async Task<bool> DeleteUserAsync(int id)
@@ -32,9 +41,19 @@ namespace Forum2.Services
 
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
-            return await _context.Users.ToListAsync();
+            var users = await _context.Users.ToListAsync();
+            var dtos = users.Select(u => new UserDto
+            {
+                Username = u.Username,
+                Id = u.Id,
+                Email = u.Email,
+                Role = u.Role,
+                FriendCount = _context.Friends.Count(f=>
+                f.UserId == u.Id ||f.FriendId == u.Id),
+            });
+            return dtos;
         }
 
         public async Task<User?> GetUserByIdAsync(int id)
@@ -44,6 +63,14 @@ namespace Forum2.Services
             {
                 throw new InvalidOperationException("User bulunamadi");
             }
+            //var dto = new UserDto
+            //{
+            //    Id = user.Id,
+            //    Email = user.Email,
+            //    FriendCount = user.Friends.Count,
+            //    Username = user.Username,
+            //    Role = user.Role,
+            //};
             return user;
         }
 

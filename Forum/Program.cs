@@ -51,6 +51,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IAuthService,AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFriendsService, FriendsService>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<JwtService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
