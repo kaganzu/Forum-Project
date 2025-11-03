@@ -65,15 +65,13 @@ namespace Forum2.Data
                 .OnDelete(DeleteBehavior.Restrict);
             //User - Friends relationship (1-N)
             modelBuilder.Entity<Friends>()
-                .HasKey(f => new { f.UserId, f.FriendId }); //Aynı kullanıcı aynı arkadaşı birden fazla ekleyemez
-            modelBuilder.Entity<Friends>()
                 .HasOne(f => f.User)
                 .WithMany(u => u.Friends)
                 .HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Friends>()
                 .HasOne(f => f.Friend)
-                .WithMany(u => u.FriendOf)
+                .WithMany() 
                 .HasForeignKey(f => f.FriendId)
                 .OnDelete(DeleteBehavior.Restrict);
             //Like - User relationship (1-N)

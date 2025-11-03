@@ -13,7 +13,6 @@
         public ICollection<FriendRequest> SentFriendRequests { get; set; } = new List<FriendRequest>();
         public ICollection<FriendRequest> ReceivedFriendRequests { get; set; } = new List<FriendRequest>();
         public ICollection<Friends> Friends { get; set; } = new List<Friends>();
-        public ICollection<Friends> FriendOf { get; set; } = new List<Friends>();
     }
     public enum UserRole
     {

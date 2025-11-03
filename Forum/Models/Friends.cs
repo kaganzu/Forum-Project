@@ -1,7 +1,10 @@
-﻿namespace Forum2.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Forum2.Models
 {
     public class Friends
     {
+        [Key]
         public int Id { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }

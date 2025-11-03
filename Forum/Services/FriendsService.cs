@@ -39,7 +39,7 @@ namespace Forum2.Services
                 };
                 await _context.Friends.AddAsync(friendship);
                 await _context.SaveChangesAsync();
-                return "friendship started";
+                return "friendship started" + friendship.Id;
             }
             if(state == State.Rejected)
             {

@@ -119,18 +119,23 @@ namespace Forum2.Migrations
 
             modelBuilder.Entity("Forum2.Models.Friends", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("FriendId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Id")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("UserId", "FriendId");
+                    b.HasKey("Id");
 
                     b.HasIndex("FriendId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Friends");
                 });
@@ -214,7 +219,7 @@ namespace Forum2.Migrations
                         {
                             Id = 1,
                             Email = "kaganidilman@gmail.com",
-                            PasswordHash = "AQAAAAIAAYagAAAAEMrFgOHHTvE0JSOOF52kZQ/yBgVvufPx3B2Nya8Q5oY53AOQuNTOpdH7XDE90lblTQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKgZrrPERP42cA3Z07jN6waUOqgprPmW/Ipk8vyfIGzR+l//xXc8r3IePGoYcecjSQ==",
                             Role = 0,
                             Username = "kagan.id"
                         },
@@ -222,7 +227,7 @@ namespace Forum2.Migrations
                         {
                             Id = 2,
                             Email = "kagankaramazov@gmail.com",
-                            PasswordHash = "AQAAAAIAAYagAAAAEHmN1xxssFNGJx4QQrU9XmGRNGYn3VoozWwSsZLFSoV+TCHtOvZHhivMnutiRsyjMA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKUTMPTW3M6C4v5NaJSVvDO776/Bu6DbuzrkKcroeGP42nHq1/LhEQSanvA7Ulk2+g==",
                             Role = 1,
                             Username = "moderator.id"
                         });
@@ -284,7 +289,7 @@ namespace Forum2.Migrations
             modelBuilder.Entity("Forum2.Models.Friends", b =>
                 {
                     b.HasOne("Forum2.Models.User", "Friend")
-                        .WithMany("FriendOf")
+                        .WithMany()
                         .HasForeignKey("FriendId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -340,8 +345,6 @@ namespace Forum2.Migrations
             modelBuilder.Entity("Forum2.Models.User", b =>
                 {
                     b.Navigation("Comments");
-
-                    b.Navigation("FriendOf");
 
                     b.Navigation("Friends");
 

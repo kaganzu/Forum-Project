@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Forum2.Migrations
 {
     /// <inheritdoc />
@@ -85,13 +87,14 @@ namespace Forum2.Migrations
                 name: "Friends",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    FriendId = table.Column<int>(type: "int", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    FriendId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Friends", x => new { x.UserId, x.FriendId });
+                    table.PrimaryKey("PK_Friends", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Friends_Users_FriendId",
                         column: x => x.FriendId,
@@ -213,6 +216,15 @@ namespace Forum2.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Email", "PasswordHash", "Role", "Username" },
+                values: new object[,]
+                {
+                    { 1, "kaganidilman@gmail.com", "AQAAAAIAAYagAAAAEKgZrrPERP42cA3Z07jN6waUOqgprPmW/Ipk8vyfIGzR+l//xXc8r3IePGoYcecjSQ==", 0, "kagan.id" },
+                    { 2, "kagankaramazov@gmail.com", "AQAAAAIAAYagAAAAEKUTMPTW3M6C4v5NaJSVvDO776/Bu6DbuzrkKcroeGP42nHq1/LhEQSanvA7Ulk2+g==", 1, "moderator.id" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_PostId",
                 table: "Comments",
@@ -237,6 +249,11 @@ namespace Forum2.Migrations
                 name: "IX_Friends_FriendId",
                 table: "Friends",
                 column: "FriendId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Friends_UserId",
+                table: "Friends",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Likes_PostId",

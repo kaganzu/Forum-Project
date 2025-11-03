@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Forum2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251101144131_AddAdminUser")]
-    partial class AddAdminUser
+    [Migration("20251103090438_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -122,18 +122,23 @@ namespace Forum2.Migrations
 
             modelBuilder.Entity("Forum2.Models.Friends", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("FriendId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Id")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("UserId", "FriendId");
+                    b.HasKey("Id");
 
                     b.HasIndex("FriendId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Friends");
                 });
@@ -217,9 +222,17 @@ namespace Forum2.Migrations
                         {
                             Id = 1,
                             Email = "kaganidilman@gmail.com",
-                            PasswordHash = "AQAAAAIAAYagAAAAEIOYZbkXhZ5JyBssB/1vS30gTqp0YD6srCH5qqDlDOjKDc3gH6gPVLNqPH3kBqyQ9w==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKgZrrPERP42cA3Z07jN6waUOqgprPmW/Ipk8vyfIGzR+l//xXc8r3IePGoYcecjSQ==",
                             Role = 0,
                             Username = "kagan.id"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "kagankaramazov@gmail.com",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKUTMPTW3M6C4v5NaJSVvDO776/Bu6DbuzrkKcroeGP42nHq1/LhEQSanvA7Ulk2+g==",
+                            Role = 1,
+                            Username = "moderator.id"
                         });
                 });
 
@@ -279,7 +292,7 @@ namespace Forum2.Migrations
             modelBuilder.Entity("Forum2.Models.Friends", b =>
                 {
                     b.HasOne("Forum2.Models.User", "Friend")
-                        .WithMany("FriendOf")
+                        .WithMany()
                         .HasForeignKey("FriendId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -335,8 +348,6 @@ namespace Forum2.Migrations
             modelBuilder.Entity("Forum2.Models.User", b =>
                 {
                     b.Navigation("Comments");
-
-                    b.Navigation("FriendOf");
 
                     b.Navigation("Friends");
 
