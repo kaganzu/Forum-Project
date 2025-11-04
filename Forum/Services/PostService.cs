@@ -50,13 +50,25 @@ namespace Forum2.Services
             return postRes;
         }
 
-        public async Task<bool> DeletePostAsync(int id)
+        public async Task<bool> DeletePostAsync(int id,int userId)
         {
             var Deleted = await _context.Posts.FindAsync(id);
+
+            var isPostBelongToUser = await _context.Posts
+                .AnyAsync(p => p.Id == id && p.UserId == userId);
+            var user = await _userService.GetUserByIdAsync(userId);
+            var isAdmin = (user.Role == UserRole.Admin);
+
+            if (!isPostBelongToUser && !isAdmin)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this");
+            }
+
             if (Deleted == null)
             {
                 throw new InvalidOperationException("Post bulunamadi");
             }
+
             _context.Posts.Remove(Deleted);
             await _context.SaveChangesAsync();
             return true;

@@ -10,6 +10,6 @@ namespace Forum2.Implementations
         Task<IEnumerable<PostResponse>> GetAllPostsAsync();//read
         Task<PostResponse?> GetPostByIdAsync(int id);//read
         Task<Post?> UpdatePostAsync(int id, Post updatedPost);//update
-        Task<bool> DeletePostAsync(int id);//delete
+        Task<bool> DeletePostAsync(int id, int userId);//delete
     }
 }

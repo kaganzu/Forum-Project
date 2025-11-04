@@ -108,4 +108,4 @@ namespace Forum2.Data
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
-    }
+}

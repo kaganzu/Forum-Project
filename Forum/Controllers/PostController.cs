@@ -34,5 +34,25 @@ namespace Forum2.Controllers
             await _postService.CreatePostAsync(_post, userId);
             return Ok("post created");
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPostByIdAsync(int id)
+        {
+            var result = await _postService.GetPostByIdAsync(id);
+            if (result == null)
+            {
+                return NotFound(new { message = "Post not found." });
+            }
+            return Ok(result);
+        }
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePostAsync(int id)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            await _postService.DeletePostAsync(id, userId);
+            return Ok("Post deleted successfully.");
+
+        }
     }
 }
