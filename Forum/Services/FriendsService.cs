@@ -76,6 +76,8 @@ namespace Forum2.Services
             {
                 FriendId = (fr.UserId == userId ? fr.FriendId : fr.UserId),
                 FriendName = (fr.UserId == userId ? fr.Friend.Username : fr.User.Username),
+                UserId = (fr.UserId == userId ? fr.UserId : fr.FriendId),
+                Username = (fr.UserId == userId ? fr.User.Username : fr.Friend.Username),
             });
         }
 

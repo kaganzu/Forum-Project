@@ -57,10 +57,18 @@ namespace Forum2.Controllers
             if (request == null) throw new Exception("request could not be found");
             if(!(request.ReceiverId == userId))
             {
-                throw new Exception("you cannot answer this request cause its not yours.");
+                throw new Exception("you cannot answer this request cause its not yours");
             }
             var response = await _friendService.AnswerFriendRequestAsync(requestId, state);
             return Ok(new {message = response});
+        }
+        [Authorize]
+        [HttpDelete("{FriendId}")]
+        public async Task<IActionResult> DeleteFriendship(int FriendId)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            await _friendService.DeleteFriendAsync(userId, FriendId);
+            return Ok("friendship ended");
         }
     }
 }

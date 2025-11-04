@@ -11,6 +11,7 @@ namespace Forum2.Dto
         public int UserId { get; set; }
         public string Username { get; set; }
         public List<string> Categories { get; set; }
+        public int LikeCount {  get; set; }
         //public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         //public ICollection<Like> Likes { get; set; } = new List<Like>();
     }

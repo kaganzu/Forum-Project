@@ -54,5 +54,12 @@ namespace Forum2.Controllers
             return Ok("Post deleted successfully.");
 
         }
+        [Authorize]
+        [HttpGet("{id}/comments")]
+        public async Task<IActionResult> GetPostsComments(int id)
+        {
+            var res = await _postService.GetPostComments(id);
+            return Ok(res);
+        }
     }
 }

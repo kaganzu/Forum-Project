@@ -46,6 +46,7 @@ namespace Forum2.Services
                 Categories = post.Categories.Select(c=>c.Name).ToList(),
                 CreatedAt = post.CreatedAt,
                 Id = post.Id,
+                LikeCount = post.Likes.Count,
             };
             return postRes;
         }
@@ -79,6 +80,7 @@ namespace Forum2.Services
             var posts = await _context.Posts
                 .Include(p => p.User)
                 .Include(p => p.Categories)
+                .Include(p => p.Likes)
                 .ToListAsync();
 
             var response = posts.Select(pr => new PostResponse
@@ -89,6 +91,7 @@ namespace Forum2.Services
                 Username= pr.User.Username,
                 Categories = pr.Categories.Select(c => c.Name).ToList(),
                 CreatedAt = pr.CreatedAt,
+                LikeCount = pr.Likes.Count,
                 Id = pr.Id,
             });
             return response;
@@ -99,6 +102,7 @@ namespace Forum2.Services
             var post = await _context.Posts
                 .Include (p => p.User)
                 .Include(p => p.Categories)
+                .Include(p => p.Likes)
                 .FirstOrDefaultAsync(p=> p.Id == id);
 
             if (post == null)
@@ -114,8 +118,29 @@ namespace Forum2.Services
                 Categories = post.Categories.Select(c => c.Name).ToList(),
                 CreatedAt = post.CreatedAt,
                 Id = post.Id,
-
+                LikeCount = post.Likes.Count
             };
+            return res;
+        }
+
+        public async Task<IEnumerable<CommentResponse>> GetPostComments(int postId)
+        {
+            var post = await _context.Posts
+                .Include(p => p.User)
+                .Include(p => p.Comments)
+                .ThenInclude(c => c.User)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+            if (post == null) throw new Exception("post not exist");
+            var res = post.Comments.Select(c => new CommentResponse
+            {
+                Id = c.Id,
+                Content = c.Content,
+                UserId = c.UserId,
+                UserName = c.User.Username,
+                CreatedAt= c.CreatedAt,
+                PostId = c.PostId,
+                PostTitle = c.Post.Title
+            });
             return res;
         }
 

@@ -54,6 +54,8 @@ builder.Services.AddScoped<IFriendsService, FriendsService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ILikeService, LikeService>();
 builder.Services.AddScoped<JwtService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
