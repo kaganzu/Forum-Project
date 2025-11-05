@@ -30,7 +30,8 @@ namespace Forum2.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _userService.GetAllUsersAsync();
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var users = await _userService.GetAllUsersAsync(userId);
             return Ok(users);
         }
         [Authorize]

@@ -18,7 +18,11 @@ namespace Forum2.Services
         }
         public async Task<string> AnswerFriendRequestAsync(int requestId, State state)
         {
-            var friendRequest = await _context.FriendRequests.FindAsync(requestId);
+            var friendRequest = await _context.FriendRequests
+            .Include(fr => fr.Sender)
+            .Include(fr => fr.Receiver)
+            .FirstOrDefaultAsync(fr => fr.Id == requestId);
+
             if (friendRequest == null)
             {
                 throw new InvalidOperationException("Friend request not found");

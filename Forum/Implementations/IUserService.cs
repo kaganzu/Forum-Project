@@ -7,7 +7,7 @@ namespace Forum2.Implementations
     {
         //Önce CRUD
         Task<UserDto> CreateUserAsync(User user);//create
-        Task<IEnumerable<UserDto>> GetAllUsersAsync();//read
+        Task<IEnumerable<UserDto>> GetAllUsersAsync(int userId);//read
         Task<User?> GetUserByIdAsync(int id);//read
         Task<User?> UpdateUserAsync(int id, User updatedUser);//update
         Task<bool> DeleteUserAsync(int id);//delete

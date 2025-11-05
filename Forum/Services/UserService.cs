@@ -41,9 +41,11 @@ namespace Forum2.Services
 
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync(int userId)
         {
-            var users = await _context.Users.ToListAsync();
+            var users = await _context.Users
+                .Where(u => u.Id != userId) // 👈 kendisini hariç tut
+                .ToListAsync();
             var dtos = users.Select(u => new UserDto
             {
                 Username = u.Username,
