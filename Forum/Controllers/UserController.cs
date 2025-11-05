@@ -75,6 +75,17 @@ namespace Forum2.Controllers
             }
             await _userService.DeleteUserAsync(id);
             return Ok(new { message = "User deleted successfully." });
-        } 
+        }
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+            return Ok(user);
+        }
+
     }
 }
