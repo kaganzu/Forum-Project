@@ -97,10 +97,22 @@ namespace Forum2.Services
             return response;
         }
 
+        public async Task<IEnumerable<LikeResponse>> GetLikesOfPost(int postId)
+        {
+            var likes = await _context.Likes
+                .Include(l => l.User)
+                .ToListAsync();
+            var res = likes.Select(l => new LikeResponse
+            {
+                Username = l.User.Username,
+            });
+            return res;
+        }
+
         public async Task<PostResponse?> GetPostByIdAsync(int id)
         {
             var post = await _context.Posts
-                .Include (p => p.User)
+                .Include(p => p.User)
                 .Include(p => p.Categories)
                 .Include(p => p.Likes)
                 .FirstOrDefaultAsync(p=> p.Id == id);

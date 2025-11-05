@@ -3,6 +3,7 @@ using Forum2.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Forum2.Controllers
 {
@@ -20,6 +21,12 @@ namespace Forum2.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCategory([FromBody] CategoryRequest request)
         {
+            var IsAdmin = User.IsInRole("Admin");
+            var IsModerator = User.IsInRole("Moderator");
+            if (!IsAdmin && !IsModerator)
+            {
+                return Forbid();
+            }
             var res = await _categoryService.CreateCategoryAsync(request);
             return Ok(res);
         }
@@ -41,6 +48,12 @@ namespace Forum2.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
+            var IsAdmin = User.IsInRole("Admin");
+            var IsModerator = User.IsInRole("Moderator");
+            if (!IsAdmin && IsModerator)
+            {
+                return Forbid();
+            }
             await _categoryService.DeleteCategoryAsync(id);
             return Ok("deleted");
         }

@@ -37,6 +37,12 @@ namespace Forum2.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllComments()
         {
+            var IsAdmin = User.IsInRole("Admin");
+            var IsModerator = User.IsInRole("Moderator");
+            if (!IsAdmin && !IsModerator)
+            {
+                return Forbid();
+            }
             var comments = await _commentService.GetAllCommentsAsync();
             return Ok(comments);
         }
@@ -45,6 +51,12 @@ namespace Forum2.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCommentById(int id)
         {
+            var IsAdmin = User.IsInRole("Admin");
+            var IsModerator = User.IsInRole("Moderator");
+            if (!IsAdmin && !IsModerator)
+            {
+                return Forbid();
+            }
             var comment = await _commentService.GetCommentByIdAsync(id);
             return Ok(comment);
         }
@@ -59,7 +71,7 @@ namespace Forum2.Controllers
             var isUser = comment.UserId == userId;
             var isAdmin = User.IsInRole("Admin");
 
-            if (isUser || isAdmin)
+            if (isUser && isAdmin)
             {
                 await _commentService.DeleteCommentAsync(id);
                 return Ok("deleted succesfully");

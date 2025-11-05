@@ -17,7 +17,8 @@ namespace Forum2.Services
         {
             var isAlreadyLiked = await _context.Likes.AnyAsync(l => l.UserId == userId && l.PostId == _like.PostId);
             if (isAlreadyLiked) throw new Exception("already liked");
-            var post = _context.Posts.Find(_like.PostId);
+
+            var post = await _context.Posts.FindAsync(_like.PostId);
             if (post == null) throw new Exception("couldnt find post");
             var user = await  _context.Users.FindAsync(userId);
             var like = new Like
@@ -39,9 +40,10 @@ namespace Forum2.Services
             return res;
         }
 
-        public async Task<bool> DeleteLikeAsync(int id)
+        public async Task<bool> DeleteLikeAsync(int postId,int userId)
         {
-            var Deleted = await _context.Likes.FindAsync(id);
+            var Deleted = await _context.Likes
+                .FirstOrDefaultAsync(l => l.PostId == postId && l.UserId==userId);
             if (Deleted == null)
             {
                 throw new InvalidOperationException("Like bulunamadi");
@@ -69,18 +71,22 @@ namespace Forum2.Services
 
         public async Task<LikeResponse?> GetLikeByIdAsync(int id)
         {
-            var IsNull = await _context.Likes.FindAsync(id);
+            var IsNull = await _context.Likes
+                .Where(l=> l.Id == id)
+                .Include(l => l.User)
+                .Include(l => l.Post)
+                .ToListAsync();
             if (IsNull == null)
             {
                 throw new InvalidOperationException("Like bulunamadi");
             }
-            var res = new LikeResponse
+           var res = IsNull.Select(l => new LikeResponse
             {
-                PostId = IsNull.PostId,
-                PostTitle = IsNull.Post.Title,
-                UserId = IsNull.UserId,
-                Username = IsNull.User.Username,
-            };
+                PostId = l.PostId,
+                PostTitle = l.Post.Title,
+                UserId = l.UserId,
+                Username = l.User.Username,
+            }).FirstOrDefault();
             return res;
         }
 

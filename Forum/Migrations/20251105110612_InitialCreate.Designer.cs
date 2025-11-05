@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Forum2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251103090438_InitialCreate")]
+    [Migration("20251105110612_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -145,18 +145,23 @@ namespace Forum2.Migrations
 
             modelBuilder.Entity("Forum2.Models.Like", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("PostId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Id")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("UserId", "PostId");
+                    b.HasKey("Id");
 
                     b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Likes");
                 });
@@ -222,7 +227,7 @@ namespace Forum2.Migrations
                         {
                             Id = 1,
                             Email = "kaganidilman@gmail.com",
-                            PasswordHash = "AQAAAAIAAYagAAAAEKgZrrPERP42cA3Z07jN6waUOqgprPmW/Ipk8vyfIGzR+l//xXc8r3IePGoYcecjSQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEPBEMKI1Z+fcORBtQULeUlpkuq9plngXzCNeRg1Pz9Px1WZFdn7BIBFU0h04YVRfjg==",
                             Role = 0,
                             Username = "kagan.id"
                         },
@@ -230,7 +235,7 @@ namespace Forum2.Migrations
                         {
                             Id = 2,
                             Email = "kagankaramazov@gmail.com",
-                            PasswordHash = "AQAAAAIAAYagAAAAEKUTMPTW3M6C4v5NaJSVvDO776/Bu6DbuzrkKcroeGP42nHq1/LhEQSanvA7Ulk2+g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELu+mQ8dbThZoAIM//MV/ILHkIhFihOYaS0AuDIGYjtuhRU5POXZxVOv7vhDVHdHPg==",
                             Role = 1,
                             Username = "moderator.id"
                         });

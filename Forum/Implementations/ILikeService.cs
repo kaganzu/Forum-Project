@@ -10,6 +10,6 @@ namespace Forum2.Implementations
         Task<IEnumerable<LikeResponse>> GetAllLikesAsync();//read
         Task<LikeResponse?> GetLikeByIdAsync(int id);//read
         Task<Like?> UpdateLikeAsync(int id, Like updatedLike);//update
-        Task<bool> DeleteLikeAsync(int id);//delete
+        Task<bool> DeleteLikeAsync(int postId,int userId);//delete
     }
 }

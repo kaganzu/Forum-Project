@@ -15,6 +15,7 @@ namespace Forum2.Controllers
         {
             _userService = userService;
         }
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
@@ -25,12 +26,14 @@ namespace Forum2.Controllers
             }
             return Ok(user);
         }
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
             return Ok(users);
         }
+        [Authorize]
         [HttpGet]
         [Route("{id}/posts")]
         public async Task<IActionResult> GetUserPosts(int id)
@@ -38,6 +41,7 @@ namespace Forum2.Controllers
             var posts = await _userService.GetUserPostsAsync(id);
             return Ok(posts);
         }
+        [Authorize]
         [HttpGet]
         [Route("{id}/comments")]
         public async Task<IActionResult> GetUserComments(int id)
@@ -45,6 +49,7 @@ namespace Forum2.Controllers
             var comments = await _userService.GetUserCommentsAsync(id);
             return Ok(comments);
         }
+        [Authorize]
         [HttpGet]
         [Route("{id}/likes")]
         public async Task<IActionResult> GetUserLikes(int id)

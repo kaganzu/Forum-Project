@@ -16,6 +16,7 @@ namespace Forum2.Controllers
         {
             _likeService = likeService;
         }
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllLikes()
         {
@@ -42,7 +43,8 @@ namespace Forum2.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLike(int id)
         {
-            var res = await _likeService.DeleteLikeAsync(id);
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var res = await _likeService.DeleteLikeAsync(id,userId);
             return Ok(res);
         }
     }

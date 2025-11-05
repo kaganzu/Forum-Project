@@ -169,13 +169,14 @@ namespace Forum2.Migrations
                 name: "Likes",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    PostId = table.Column<int>(type: "int", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    PostId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Likes", x => new { x.UserId, x.PostId });
+                    table.PrimaryKey("PK_Likes", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Likes_Posts_PostId",
                         column: x => x.PostId,
@@ -221,8 +222,8 @@ namespace Forum2.Migrations
                 columns: new[] { "Id", "Email", "PasswordHash", "Role", "Username" },
                 values: new object[,]
                 {
-                    { 1, "kaganidilman@gmail.com", "AQAAAAIAAYagAAAAEKgZrrPERP42cA3Z07jN6waUOqgprPmW/Ipk8vyfIGzR+l//xXc8r3IePGoYcecjSQ==", 0, "kagan.id" },
-                    { 2, "kagankaramazov@gmail.com", "AQAAAAIAAYagAAAAEKUTMPTW3M6C4v5NaJSVvDO776/Bu6DbuzrkKcroeGP42nHq1/LhEQSanvA7Ulk2+g==", 1, "moderator.id" }
+                    { 1, "kaganidilman@gmail.com", "AQAAAAIAAYagAAAAEPBEMKI1Z+fcORBtQULeUlpkuq9plngXzCNeRg1Pz9Px1WZFdn7BIBFU0h04YVRfjg==", 0, "kagan.id" },
+                    { 2, "kagankaramazov@gmail.com", "AQAAAAIAAYagAAAAELu+mQ8dbThZoAIM//MV/ILHkIhFihOYaS0AuDIGYjtuhRU5POXZxVOv7vhDVHdHPg==", 1, "moderator.id" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -259,6 +260,11 @@ namespace Forum2.Migrations
                 name: "IX_Likes_PostId",
                 table: "Likes",
                 column: "PostId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Likes_UserId",
+                table: "Likes",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PostCategories_PostsId",

@@ -19,7 +19,7 @@ namespace Forum2.Controllers
             _postService = postService;
             _userService = userService;
         }
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllPostsAsync()
         {
@@ -34,6 +34,7 @@ namespace Forum2.Controllers
             await _postService.CreatePostAsync(_post, userId);
             return Ok("post created");
         }
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPostByIdAsync(int id)
         {
@@ -49,6 +50,15 @@ namespace Forum2.Controllers
         public async Task<IActionResult> DeletePostAsync(int id)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var IsAdmin = User.IsInRole("Admin");
+            var IsModerator = User.IsInRole("Moderator");
+            var IsPostOwner = _userService.GetUserPostsAsync(userId).Result.Any(p => p.Id == id);
+
+            if (!IsAdmin && !IsModerator && !IsPostOwner)
+            {
+                return Forbid();
+            }
+            
 
             await _postService.DeletePostAsync(id, userId);
             return Ok("Post deleted successfully.");
@@ -59,6 +69,13 @@ namespace Forum2.Controllers
         public async Task<IActionResult> GetPostsComments(int id)
         {
             var res = await _postService.GetPostComments(id);
+            return Ok(res);
+        }
+        [Authorize]
+        [HttpGet("{id}/likes")]
+        public async Task<IActionResult> GetPostLikes(int id)
+        {
+            var res = await _postService.GetLikesOfPost(id);
             return Ok(res);
         }
     }

@@ -86,8 +86,6 @@ namespace Forum2.Data
                 .WithMany(p => p.Likes)
                 .HasForeignKey(l => l.PostId)
                 .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<Like>()
-                .HasKey(l => new { l.UserId, l.PostId }); //Aynı kullanıcı aynı gönderiyi birden fazla beğenemez
             //Comment - Post relationship (1-N)
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.Post)
