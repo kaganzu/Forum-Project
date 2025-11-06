@@ -40,12 +40,13 @@ namespace Forum2.Controllers
             return Ok(res);
         }
         [Authorize]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteLike(int id)
+        [HttpDelete("post/{postId}")]
+        public async Task<IActionResult> DeleteLike(int postId)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var res = await _likeService.DeleteLikeAsync(id,userId);
-            return Ok(res);
+            var success = await _likeService.DeleteLikeAsync(postId, userId);
+            if (!success) return NotFound();
+            return Ok(new { deleted = true });
         }
     }
 }

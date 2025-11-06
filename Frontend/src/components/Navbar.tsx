@@ -241,7 +241,7 @@ export default function Navbar() {
                 className="btn btn-primary"
                 onClick={() => navigate("/profile")}
               >
-                {loadingMe ? "Profile" : myUsername || "Profile"}
+                {loadingMe ? "Profile" : "@"+myUsername || "Profile"}
               </button>
             </>
           ) : (

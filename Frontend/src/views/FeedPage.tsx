@@ -39,6 +39,41 @@ export default function FeedPage() {
 
   if (loading) return <div>Loading feed…</div>;
 
+  // Deterministic color generation for usernames
+  const colorForUsername = (username: string) => {
+    const palette = [
+      "#7C3AED", // purple-600
+      "#6D28D9", // purple-700
+      "#4F46E5", // indigo-600
+      "#0EA5E9", // sky-500
+      "#06B6D4", // cyan-500
+      "#14B8A6", // teal-500
+      "#10B981", // green-500
+      "#F59E0B", // amber-500
+      "#F97316", // orange-500
+      "#EF4444", // red-500
+    ];
+
+    let hash = 0;
+    for (let i = 0; i < username.length; i++) {
+      hash = (hash << 5) - hash + username.charCodeAt(i);
+      hash |= 0;
+    }
+    return palette[Math.abs(hash) % palette.length];
+  };
+
+  const getTextColorForBackground = (hex: string) => {
+    const c = hex.replace("#", "");
+    const r = parseInt(c.substring(0, 2), 16) / 255;
+    const g = parseInt(c.substring(2, 4), 16) / 255;
+    const b = parseInt(c.substring(4, 6), 16) / 255;
+    const srgb = [r, g, b].map((v) =>
+      v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+    );
+    const lum = 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+    return lum > 0.5 ? "#111827" : "#ffffff";
+  };
+
   return (
     <div className="min-h-screen space-y-6 bg-gradient-to-b from-purple-50/80 to-neutral-50 px-4 py-6">
       {/* ÜST KISIM */}
@@ -118,8 +153,18 @@ export default function FeedPage() {
 
               {/* ALT BÖLÜM */}
               <div className="mt-auto pt-4 border-t border-neutral-100 flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-medium">
+                <div className="flex items-center space-x-3">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold"
+                    style={{
+                      backgroundColor: colorForUsername(
+                        p.username || `user${p.userId}`
+                      ),
+                      color: getTextColorForBackground(
+                        colorForUsername(p.username || `user${p.userId}`)
+                      ),
+                    }}
+                  >
                     {(p.username || `user${p.userId}`).charAt(0).toUpperCase()}
                   </div>
                   <div className="text-neutral-600">

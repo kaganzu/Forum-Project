@@ -32,6 +32,7 @@ namespace Forum2.Services
             await _context.SaveChangesAsync();
             var res = new LikeResponse
             {
+                Id = like.Id,
                 PostId = like.PostId,
                 PostTitle = like.Post.Title,
                 UserId = like.UserId,
@@ -40,15 +41,15 @@ namespace Forum2.Services
             return res;
         }
 
-        public async Task<bool> DeleteLikeAsync(int postId,int userId)
+        public async Task<bool> DeleteLikeAsync(int postId, int userId)
         {
-            var Deleted = await _context.Likes
-                .FirstOrDefaultAsync(l => l.PostId == postId && l.UserId==userId);
-            if (Deleted == null)
+            var like = await _context.Likes
+                .FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId);
+            if (like == null)
             {
-                throw new InvalidOperationException("Like bulunamadi");
+                return false;
             }
-            _context.Likes.Remove(Deleted);
+            _context.Likes.Remove(like);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -61,6 +62,7 @@ namespace Forum2.Services
                 .ToListAsync();
             var res = likes.Select(l => new LikeResponse
             {
+                Id = l.Id,
                 PostId = l.PostId,
                 PostTitle = l.Post.Title,
                 UserId = l.UserId,
@@ -71,23 +73,24 @@ namespace Forum2.Services
 
         public async Task<LikeResponse?> GetLikeByIdAsync(int id)
         {
-            var IsNull = await _context.Likes
-                .Where(l=> l.Id == id)
+            var like = await _context.Likes
                 .Include(l => l.User)
                 .Include(l => l.Post)
-                .ToListAsync();
-            if (IsNull == null)
+                .FirstOrDefaultAsync(l => l.Id == id);
+                
+            if (like == null)
             {
                 throw new InvalidOperationException("Like bulunamadi");
             }
-           var res = IsNull.Select(l => new LikeResponse
+            
+            return new LikeResponse
             {
-                PostId = l.PostId,
-                PostTitle = l.Post.Title,
-                UserId = l.UserId,
-                Username = l.User.Username,
-            }).FirstOrDefault();
-            return res;
+                Id = like.Id,
+                PostId = like.PostId,
+                PostTitle = like.Post.Title,
+                UserId = like.UserId,
+                Username = like.User.Username,
+            };
         }
 
         public Task<Like?> UpdateLikeAsync(int id, Like updatedLike)
