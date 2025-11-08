@@ -14,8 +14,9 @@ type FriendRequest = {
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin, userId } = useAuth();
+  const { isAuthenticated, isAdmin, userId, logout } = useAuth();
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [myUsername, setMyUsername] = useState<string | null>(null);
   const [loadingMe, setLoadingMe] = useState(false);
 
@@ -28,18 +29,28 @@ export default function Navbar() {
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [loadingSent, setLoadingSent] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const [sendingId, setSendingId] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const profileDropdownRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (!containerRef.current) return;
-      if (!containerRef.current.contains(e.target as Node))
+      if (!containerRef.current.contains(e.target as Node) && !isHovering) {
         setShowDropdown(false);
+      }
+
+      if (!profileDropdownRef.current) return;
+      if (!profileDropdownRef.current.contains(e.target as Node)) {
+        setShowProfileDropdown(false);
+      }
     };
-    document.addEventListener("click", onDoc);
-    return () => document.removeEventListener("click", onDoc);
-  }, []);
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [isHovering]);
 
   useEffect(() => {
     // load current user's username when authenticated
@@ -159,17 +170,17 @@ export default function Navbar() {
           </NavLink>
           <div ref={containerRef} className="relative">
             <input
-              className="input w-64 text-sm"
+              className="input w-64 text-sm cursor-pointer"
               placeholder="Search users..."
               value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
+              onClick={() => {
                 if (!users.length && !loadingUsers) loadUsers();
                 if (!friends.length && !loadingFriends) loadFriends();
                 if (!sentReqs.length && !loadingSent) loadSent();
-                setShowDropdown(true);
+                setShowDropdown(!showDropdown);
               }}
-              onFocus={() => {
+              onChange={(e) => {
+                setQuery(e.target.value);
                 if (!users.length && !loadingUsers) loadUsers();
                 if (!friends.length && !loadingFriends) loadFriends();
                 if (!sentReqs.length && !loadingSent) loadSent();
@@ -178,7 +189,11 @@ export default function Navbar() {
             />
 
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-80 bg-white text-black rounded shadow max-h-72 overflow-auto z-50">
+              <div
+                className="absolute right-0 mt-2 w-80 bg-white text-black rounded shadow max-h-72 overflow-auto z-50"
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+              >
                 {loadingUsers || loadingFriends || loadingSent ? (
                   <div className="p-3 text-sm text-neutral-600">Loading…</div>
                 ) : filtered.length === 0 ? (
@@ -236,14 +251,50 @@ export default function Navbar() {
 
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
-            <>
+            <div className="relative" ref={profileDropdownRef}>
               <button
-                className="btn btn-primary"
-                onClick={() => navigate("/profile")}
+                className="btn btn-primary flex items-center gap-2"
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               >
-                {loadingMe ? "Profile" : "@"+myUsername || "Profile"}
+                {loadingMe ? "Profile" : "@" + myUsername || "Profile"}
+                <svg
+                  className={`w-4 h-4 transform transition-transform ${
+                    showProfileDropdown ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
               </button>
-            </>
+
+              {showProfileDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 text-sm text-gray-700 divide-y divide-gray-100">
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      navigate("/login");
+                      setShowProfileDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:text-gray-900 text-red-600"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <button className="btn" onClick={() => navigate("/login")}>

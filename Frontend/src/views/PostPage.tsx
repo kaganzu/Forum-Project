@@ -14,10 +14,12 @@ type Category = { id: number; name?: string; Name?: string };
 
 type Like = {
   id: number;
-  userId: number;
-  username: string;
-  postId: number;
-  postTitle: string;
+  userId?: number | string;
+  username?: string;
+  userName?: string;
+  postId?: number | string;
+  postTitle?: string;
+  user?: { id?: number | string; userId?: number | string; username?: string; userName?: string };
 };
 
 type Post = {
@@ -47,6 +49,44 @@ export default function PostPage() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
+  const likeKey = (postId: string | number | undefined, uid: number | null) =>
+    postId != null && uid != null ? `liked_post_${postId}_user_${uid}` : "";
+
+  const isMineLike = (l: Like, uid: number | null) => {
+    if (uid == null || !l) return false;
+    const lid =
+      l.userId ?? l.user?.id ?? l.user?.userId;
+    return String(lid) === String(uid);
+  };
+
+  const anyMineLike = (likes: Like[] | undefined, uid: number | null) => {
+    if (!likes || uid == null) return false;
+    for (const l of likes) {
+      if (isMineLike(l, uid)) return true;
+    }
+    return false;
+  };
+
+  const applyLikedWithFallback = (postId: number | undefined, likes: Like[] | undefined, uid: number | null, serverLikeCount?: number) => {
+    const inServer = anyMineLike(likes, uid);
+    if (inServer) {
+      setLiked(true);
+      // server'da var → localStorage senkronla
+      const k = likeKey(postId, uid);
+      if (k) localStorage.setItem(k, "1");
+      return;
+    }
+    // fallback: server listesinde yoksa (pagination / filtre yüzünden),
+    // localStorage işaretine bak
+    const k = likeKey(postId, uid);
+    const flag = k ? localStorage.getItem(k) : null;
+    if (flag === "1" && (serverLikeCount || 0) > 0) {
+      setLiked(true);
+    } else {
+      setLiked(false);
+    }
+  };
+
   useEffect(() => {
     const loadPost = async () => {
       if (!id) return;
@@ -59,21 +99,18 @@ export default function PostPage() {
           api.get<Like[]>(`/api/Post/${id}/likes`),
         ]);
 
-        setLikeCount(postRes.data.likeCount || 0);
+        const likes = likesRes.data || [];
+        const likeCountFromServer = postRes.data.likeCount ?? 0;
+
         setPost({
           ...postRes.data,
           comments: commentsRes.data,
-          likes: likesRes.data || [],
-          likeCount: postRes.data.likeCount || 0,
+          likes,
+          likeCount: likeCountFromServer,
         });
 
-        // Like durumunu ayarla
-        if (userId && likesRes.data) {
-          const userLike = likesRes.data.find((l) => l.userId === userId);
-          setLiked(!!userLike);
-        } else {
-          setLiked(false);
-        }
+        setLikeCount(likeCountFromServer);
+        applyLikedWithFallback(postRes.data.id, likes, userId, likeCountFromServer);
       } catch (err) {
         console.error("Error loading post:", err);
       } finally {
@@ -90,6 +127,29 @@ export default function PostPage() {
     };
   }, [id, userId]);
 
+  const refreshPostState = async () => {
+    if (!id) return;
+    try {
+      const [postRes, likesRes] = await Promise.all([
+        api.get<Post>(`/api/Post/${id}`),
+        api.get<Like[]>(`/api/Post/${id}/likes`),
+      ]);
+      const likes = likesRes.data || [];
+      const likeCountFromServer = postRes.data.likeCount ?? 0;
+
+      setLikeCount(likeCountFromServer);
+      setPost((prev) =>
+        prev
+          ? { ...prev, likeCount: likeCountFromServer, likes }
+          : prev
+      );
+
+      applyLikedWithFallback(postRes.data.id, likes, userId, likeCountFromServer);
+    } catch (err) {
+      console.error("State refresh error:", err);
+    }
+  };
+
   const handleLike = async () => {
     if (!isAuthenticated || !id) return;
 
@@ -97,27 +157,15 @@ export default function PostPage() {
       const res = await api.post("/api/Like", { postId: parseInt(id) });
       if (res.data?.id) {
         setLiked(true);
+        // localStorage'a işaret bırak (reload sonrası garanti)
+        const k = likeKey(id!, userId);
+        if (k) localStorage.setItem(k, "1");
 
-        // Post ve like bilgilerini güncelle
-        const [postRes, likesRes] = await Promise.all([
-          api.get<Post>(`/api/Post/${id}`),
-          api.get<Like[]>(`/api/Post/${id}/likes`),
-        ]);
-
-        setLikeCount(postRes.data.likeCount || 0);
-        setPost((prev) =>
-          prev
-            ? {
-                ...prev,
-                likeCount: postRes.data.likeCount || 0,
-                likes: likesRes.data || [],
-              }
-            : prev
-        );
+        await refreshPostState();
       }
     } catch (err) {
       console.error("Like error:", err);
-      refreshPostState();
+      await refreshPostState();
     }
   };
 
@@ -127,51 +175,13 @@ export default function PostPage() {
     try {
       await api.delete(`/api/Like/post/${id}`);
       setLiked(false);
+      const k = likeKey(id!, userId);
+      if (k) localStorage.removeItem(k);
 
-      // Post ve like bilgilerini güncelle
-      const [postRes, likesRes] = await Promise.all([
-        api.get<Post>(`/api/Post/${id}`),
-        api.get<Like[]>(`/api/Post/${id}/likes`),
-      ]);
-
-      setLikeCount(postRes.data.likeCount || 0);
-      setPost((prev) =>
-        prev
-          ? {
-              ...prev,
-              likeCount: postRes.data.likeCount || 0,
-              likes: likesRes.data || [],
-            }
-          : prev
-      );
+      await refreshPostState();
     } catch (err) {
       console.error("Unlike error:", err);
-      refreshPostState();
-    }
-  };
-
-  const refreshPostState = async () => {
-    try {
-      const [postRes, likesRes] = await Promise.all([
-        api.get<Post>(`/api/Post/${id}`),
-        api.get<Like[]>(`/api/Post/${id}/likes`),
-      ]);
-
-      const userLike = likesRes.data?.find((l) => l.userId === userId);
-      setLiked(!!userLike);
-      setLikeCount(postRes.data.likeCount || 0);
-
-      setPost((prev) =>
-        prev
-          ? {
-              ...prev,
-              likeCount: postRes.data.likeCount || 0,
-              likes: likesRes.data,
-            }
-          : prev
-      );
-    } catch (err) {
-      console.error("State refresh error:", err);
+      await refreshPostState();
     }
   };
 
@@ -179,6 +189,9 @@ export default function PostPage() {
     if (!confirm("Delete this post?")) return;
     try {
       await api.delete(`/api/Post/${id}`);
+      // temizle
+      const k = likeKey(id!, userId);
+      if (k) localStorage.removeItem(k);
       navigate("/");
     } catch (err) {
       console.error(err);
@@ -209,9 +222,6 @@ export default function PostPage() {
     "Anonymous";
 
   const getCommentAuthor = (c: Comment) => {
-    // support different shapes coming from the API
-    // possible fields: c.user?.username, c.user?.userName, c.username, c.userName, or fallback to userId
-    // also guard against empty strings
     const nameFromUser = c.user?.username || c.user?.userName;
     if (nameFromUser && nameFromUser.trim()) return nameFromUser;
     const topName = (c as any).username || (c as any).userName;
@@ -223,31 +233,28 @@ export default function PostPage() {
   const getCommentInitial = (c: Comment) => {
     const name = getCommentAuthor(c);
     if (!name) return "?";
-    // take first letter that's a letter/number
     const ch = String(name).trim().charAt(0).toUpperCase();
     return ch || "?";
   };
 
-  // generate a consistent color per username using a small palette
   const colorForName = (nameOrComment: string | Comment) => {
     const name =
       typeof nameOrComment === "string"
         ? nameOrComment
         : getCommentAuthor(nameOrComment);
     const palette = [
-      "#7C3AED", // purple-600
-      "#6D28D9", // purple-700
-      "#4F46E5", // indigo-600
-      "#0EA5E9", // sky-500
-      "#06B6D4", // cyan-500
-      "#14B8A6", // teal-500
-      "#10B981", // green-500
-      "#F59E0B", // amber-500
-      "#F97316", // orange-500
-      "#EF4444", // red-500
+      "#7C3AED",
+      "#6D28D9",
+      "#4F46E5",
+      "#0EA5E9",
+      "#06B6D4",
+      "#14B8A6",
+      "#10B981",
+      "#F59E0B",
+      "#F97316",
+      "#EF4444",
     ];
 
-    // simple hash
     let h = 0;
     for (let i = 0; i < name.length; i++) {
       h = (h << 5) - h + name.charCodeAt(i);
@@ -258,7 +265,6 @@ export default function PostPage() {
   };
 
   const textColorForBg = (hex: string) => {
-    // compute luminance - use relative luminance formula
     const c = hex.replace("#", "");
     const r = parseInt(c.substring(0, 2), 16) / 255;
     const g = parseInt(c.substring(2, 4), 16) / 255;
@@ -272,9 +278,9 @@ export default function PostPage() {
 
   const categories =
     post.categories && post.categories.length > 0
-      ? typeof post.categories[0] === "string"
-        ? post.categories
-        : post.categories.map((cat) => (cat as any).name || "Uncategorized")
+      ? typeof (post.categories as any[])[0] === "string"
+        ? (post.categories as unknown as string[])
+        : (post.categories as Category[]).map((cat) => cat?.name || "Uncategorized")
       : ["Uncategorized"];
 
   const canDeletePost = isAdmin || (userId && post.userId === userId);
@@ -287,8 +293,6 @@ export default function PostPage() {
             <h1 className="text-2xl font-bold text-neutral-900">
               {post.title}
             </h1>
-
-            {/* Kategoriler */}
             <div className="flex flex-wrap gap-2 mt-2">
               {categories.map((cat, i) => (
                 <span
@@ -311,12 +315,10 @@ export default function PostPage() {
           )}
         </div>
 
-        {/* İçerik */}
         <p className="text-neutral-800 leading-7 whitespace-pre-wrap">
           {post.content || post.description || ""}
         </p>
 
-        {/* Alt bilgi */}
         <div className="mt-4 flex items-center justify-between text-sm text-neutral-500 border-t pt-3">
           <div>@{author}</div>
           <div className="flex items-center gap-3">
@@ -379,7 +381,6 @@ export default function PostPage() {
               <div key={c.id}>
                 <div className="p-4 bg-neutral-50 text-neutral-800 flex justify-between items-start">
                   <div className="flex items-start gap-3">
-                    {/* avatar with deterministic color */}
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center font-semibold flex-shrink-0"
                       style={{
